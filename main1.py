@@ -30,15 +30,15 @@ after_np = np.array(after_raw)
 
 
 with torch.no_grad():
-    f_before = model.forward_features(before_tensor)[:, 1:, :]  # remove CLS token
+    f_before = model.forward_features(before_tensor)[:, 1:, :]  
     f_after = model.forward_features(after_tensor)[:, 1:, :]
 
 
 diff = torch.abs(f_before - f_after).mean(dim=2).reshape(14, 14).detach().numpy()
 norm_map = (diff - diff.min()) / (diff.max() - diff.min())
 
-# Upscale heatmap without cv2
-heatmap_up = np.kron(norm_map, np.ones((16,16)))  # 14*16 = 224
+
+heatmap_up = np.kron(norm_map, np.ones((16,16)))  
 
 
 heat_intensity = (heatmap_up * 255).astype(np.uint8)
@@ -68,11 +68,11 @@ snow_mask = ((after_np.mean(axis=2) > 200) & (before_np.mean(axis=2) < 180)) | \
 
 
 multi_class = np.zeros((224,224,3), dtype=np.uint8)
-multi_class[flood_mask] = [0, 0, 255]       # Blue → Flood
-multi_class[veg_loss_mask] = [0,255,0]      # Green → Vegetation Loss
-multi_class[building_mask] = [255,255,0]    # Yellow → New Buildings
-multi_class[fire_mask] = [255,0,0]          # Red → Fire
-multi_class[snow_mask] = [255,255,255]      # White → Snow
+multi_class[flood_mask] = [0, 0, 255]       
+multi_class[veg_loss_mask] = [0,255,0]      
+multi_class[building_mask] = [255,255,0]    
+multi_class[fire_mask] = [255,0,0]          
+multi_class[snow_mask] = [255,255,255]      
 
 multi_overlay = (0.6 * before_np + 0.4 * multi_class).astype(np.uint8)
 
